@@ -1,4 +1,5 @@
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
 import { parseArgs } from 'node:util';
 import { pathToFileURL } from 'node:url';
 import { Flume, CFL, FLUME_LENGTH, GRAVITY, gateRelease } from '../web/lib/solver.mjs';
@@ -82,9 +83,31 @@ export function benchmark() {
   };
 }
 
+// CI can run on a different CPU or JS engine. Compare physical measurements
+// with roundoff allowances, but require identical protocol, grids and counts.
+export function verifyReceipt(expected, actual, field = 'report') {
+  if (typeof expected === 'number' && !Number.isInteger(expected)) {
+    assert.ok(Number.isFinite(actual), field + ' must be a finite number');
+    const tolerance = 1e-10 * Math.max(1, Math.abs(expected));
+    assert.ok(Math.abs(actual - expected) <= tolerance, field + ' differs from the reference run');
+  } else if (expected && typeof expected === 'object') {
+    assert.deepEqual(Object.keys(actual).sort(), Object.keys(expected).sort(), field + ' has different fields');
+    for (const key of Object.keys(expected)) verifyReceipt(expected[key], actual[key], field + '.' + key);
+  } else {
+    assert.strictEqual(actual, expected, field + ' differs from the reference run');
+  }
+}
+
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
-  const { values } = parseArgs({ options: { write: { type: 'string' } } });
-  const output = JSON.stringify(benchmark(), null, 2) + '\n';
-  if (values.write) await writeFile(values.write, output);
-  else process.stdout.write(output);
+  const { values } = parseArgs({ options: { write: { type: 'string' }, check: { type: 'string' } } });
+  if (values.write && values.check) throw new Error('Choose either --write or --check.');
+  const report = benchmark();
+  if (values.check) {
+    verifyReceipt(report, JSON.parse(await readFile(values.check, 'utf8')));
+    console.log('Benchmark receipt matches all fields.');
+  } else {
+    const output = JSON.stringify(report, null, 2) + '\n';
+    if (values.write) await writeFile(values.write, output);
+    else process.stdout.write(output);
+  }
 }

@@ -11,4 +11,5 @@ jobs:
         with:
           node-version: 22
       - run: node --test
+      - run: node scripts/benchmark.mjs --check web/benchmark.json
       - run: node scripts/run.mjs --cells 960 --time 4

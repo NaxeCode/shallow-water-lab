@@ -1,10 +1,9 @@
 import test from 'node:test';
-import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { Flume, GRAVITY, gateRelease } from '../web/lib/solver.mjs';
 import { runExperiment, STANDARD } from '../web/lib/experiment.mjs';
 import { wetBedReference } from '../web/lib/reference.mjs';
-import { benchmark } from '../scripts/benchmark.mjs';
+import { benchmark, verifyReceipt } from '../scripts/benchmark.mjs';
 
 function near(actual, expected, tolerance) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} differs from ${expected}`);
@@ -75,13 +74,9 @@ test('reject dry beds, misaligned gates, excessive CFL and backward integration'
 test('grid refinement resolves the wet-bed release and the independent smooth-wave speed', () => {
   const b = benchmark();
   const dam = b.gate_release.grids, wave = b.periodic_simple_wave.grids;
-  const receipt = JSON.parse(readFileSync(new URL('../web/benchmark.json', import.meta.url), 'utf8'));
-  assert.deepEqual(receipt.gate_release.grids.map(row => row.cells), dam.map(row => row.cells));
   assert.ok(dam.at(-1).mean_abs_depth_error_m < 0.007);
   assert.ok(dam.at(-1).shock_position_abs_error_m < dam.at(-1).dx_m);
   for (let i = 0; i < dam.length; i++) {
-    near(dam[i].mean_abs_depth_error_m, receipt.gate_release.grids[i].mean_abs_depth_error_m, 1e-10);
-    near(wave[i].measured_crest_speed_m_per_s, receipt.periodic_simple_wave.grids[i].measured_crest_speed_m_per_s, 1e-8);
     assert.ok(dam[i].max_sampled_volume_drift_m2 < 1e-9);
     assert.ok(dam[i].max_courant <= 0.45 + 1e-14);
     if (i === 0) continue;
@@ -89,4 +84,11 @@ test('grid refinement resolves the wet-bed release and the independent smooth-wa
     assert.ok(wave[i].relative_speed_error < wave[i - 1].relative_speed_error);
   }
   assert.ok(wave.at(-1).relative_speed_error < 0.00012);
+});
+
+test('the receipt check rejects missing measurements and changed values', () => {
+  assert.throws(() => verifyReceipt({ steps: 42 }, {}), /different fields/);
+  assert.throws(() => verifyReceipt({ steps: 42 }, { steps: 43 }), /differs/);
+  assert.throws(() => verifyReceipt({ error_m: 0.006 }, { error_m: 0.06 }), /differs/);
+  verifyReceipt({ error_m: 0.006 }, { error_m: 0.006000000000001 });
 });

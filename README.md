@@ -1,6 +1,6 @@
 # Shallow Water Lab
 
-Release a gate in a 120 m flume. Water accelerates out of the reservoir, a fan of waves spreads upstream, and a shock enters the shallow pool. Move the gauge across the shock and switch between 120 and 960 cells to see where the numerical model loses detail. [Open the lab](https://naxe.dev/labs/shallow-water/)
+Release a gate in a 120 m flume. Water accelerates out of the reservoir, a fan of waves spreads upstream, and a shock enters the shallow pool. Move the gauge across the shock and switch between 120 and 960 cells to see where the numerical model loses detail. [Open the lab](https://naxe-portfolio-review.vercel.app/labs/shallow-water/)
 
 ![The 2.4 m to 0.6 m release at four seconds, with a surface profile above a space-time velocity map and the gauge downstream of the gate.](docs/flume.png)
 
@@ -38,7 +38,7 @@ node scripts/run.mjs --cells 960 --time 4
 node scripts/run.mjs --upstream 1.8 --downstream 0.8 --cells 240 --time 3 --csv > profile.csv
 ```
 
-The benchmark command writes JSON to stdout. To update the checked-in receipt, use `node scripts/benchmark.mjs --write web/benchmark.json`. Optional browser checks exercise both layouts, playback, keyboard controls, the baseline and plotted probes. With the local server running and Playwright plus Chromium installed, run `node scripts/check-ui.mjs`. Pass `--engine webkit` to exercise WebKit or `--screenshots DIRECTORY` to save both views.
+The benchmark command writes JSON to stdout. Run `node scripts/benchmark.mjs --check web/benchmark.json` to compare the full run with the receipt. To update the checked-in receipt, use `node scripts/benchmark.mjs --write web/benchmark.json`. Optional browser checks exercise both layouts, playback, keyboard controls, the baseline and plotted probes. With the local server running and Playwright plus Chromium installed, run `node scripts/check-ui.mjs`. Pass `--engine webkit` to exercise WebKit or `--screenshots DIRECTORY` to save both views.
 
 ## Solver and limits
 
