@@ -1,5 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
+import { pathToFileURL } from 'node:url';
 import { Flume, CFL, FLUME_LENGTH, GRAVITY, gateRelease } from '../web/lib/solver.mjs';
 import { wetBedReference } from '../web/lib/reference.mjs';
 import { FRAME_SECONDS, STANDARD, meanDepthError } from '../web/lib/experiment.mjs';
@@ -81,7 +82,7 @@ export function benchmark() {
   };
 }
 
-if (process.argv[1] && (await import('node:url')).pathToFileURL(process.argv[1]).href === import.meta.url) {
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   const { values } = parseArgs({ options: { write: { type: 'string' } } });
   const output = JSON.stringify(benchmark(), null, 2) + '\n';
   if (values.write) await writeFile(values.write, output);
