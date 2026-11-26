@@ -1,6 +1,6 @@
 # Shallow Water Lab
 
-Release a gate in a 120 m flume. Water accelerates out of the reservoir, a fan of waves spreads upstream, and a shock enters the shallow pool. Move the gauge across the shock and switch between 120 and 960 cells to see where the numerical model loses detail. [Open the lab](https://naxe.dev/labs/shallow-water/)
+Release a gate in a 120 m flume. Water accelerates out of the reservoir, a fan of waves spreads upstream, and a shock enters the shallow pool. Move the gauge across the shock and switch between 120 and 960 cells to see where the numerical model loses detail. [Open the lab](https://naxe.dev/labs/shallow-water/?utm_source=github&utm_medium=readme&utm_campaign=portfolio&utm_content=shallow-water)
 
 ![The 2.4 m to 0.6 m release at four seconds, with a surface profile above a space-time velocity map and the gauge downstream of the gate.](docs/flume.png)
 
